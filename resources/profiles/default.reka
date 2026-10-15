@@ -1,0 +1,101 @@
+{
+  "format": "reka-profile",
+  "version": 1,
+  "name": "Streaming Starter",
+  "audio": {
+    "master": { "type": "Windows Audio (Low Latency Mode)", "input": "", "output": "", "sampleRate": 48000, "bufferSize": 256 },
+    "secondary": [],
+    "virtual": {
+      "endpoints": [
+        { "name": "REKA Input 1", "flow": "render", "channels": 2, "sampleRate": 48000 },
+        { "name": "REKA Input 2", "flow": "render", "channels": 2, "sampleRate": 48000 },
+        { "name": "REKA Output 1", "flow": "capture", "channels": 2, "sampleRate": 48000 },
+        { "name": "REKA Output 2", "flow": "capture", "channels": 2, "sampleRate": 48000 }
+      ],
+      "applications": []
+    }
+  },
+  "mixer": {
+    "panLaw": "constantPower",
+    "inputs": [
+      {
+        "id": 1, "name": "Microphone", "colour": "#4DA3FF",
+        "source": { "port": "master", "left": 0, "right": -1 },
+        "gainDb": 0.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "mono",
+        "eq": { "enabled": true, "bands": [
+          { "on": true,  "type": "lowCut",    "freq": 80,    "gain": 0,   "q": 0.707 },
+          { "on": false, "type": "lowShelf",  "freq": 120,   "gain": 0,   "q": 0.707 },
+          { "on": true,  "type": "bell",      "freq": 300,   "gain": -2,  "q": 1.2 },
+          { "on": false, "type": "bell",      "freq": 600,   "gain": 0,   "q": 1.0 },
+          { "on": false, "type": "bell",      "freq": 1500,  "gain": 0,   "q": 1.0 },
+          { "on": true,  "type": "bell",      "freq": 4000,  "gain": 2,   "q": 0.9 },
+          { "on": false, "type": "bell",      "freq": 7000,  "gain": 0,   "q": 1.0 },
+          { "on": false, "type": "highShelf", "freq": 12000, "gain": 0,   "q": 0.707 }
+        ] },
+        "inserts": []
+      },
+      {
+        "id": 2, "name": "Desktop", "colour": "#41D6A0",
+        "source": { "port": "virtual:REKA Input 1", "left": 0, "right": 1 },
+        "gainDb": -6.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "stereo", "inserts": []
+      },
+      {
+        "id": 3, "name": "Voice Chat", "colour": "#B47CFF",
+        "source": { "port": "virtual:REKA Input 2", "left": 0, "right": 1 },
+        "gainDb": 0.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "stereo", "inserts": []
+      }
+    ],
+    "buses": [
+      {
+        "id": 100, "name": "A1 Speakers", "colour": "#FFC94D",
+        "sink": { "port": "master", "left": 0, "right": 1 },
+        "gainDb": 0.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "stereo", "inserts": []
+      },
+      {
+        "id": 101, "name": "B1 Stream", "colour": "#FF6B8B",
+        "sink": { "port": "virtual:REKA Output 1", "left": 0, "right": 1 },
+        "gainDb": 0.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "stereo", "inserts": []
+      },
+      {
+        "id": 102, "name": "B2 Chat Mic", "colour": "#7CE0FF",
+        "sink": { "port": "virtual:REKA Output 2", "left": 0, "right": 1 },
+        "gainDb": 0.0, "pan": 0.0, "mute": false, "solo": false, "fxBypass": false,
+        "phase": [false, false], "mode": "mono", "inserts": []
+      }
+    ],
+    "routes": [
+      { "from": 1, "to": 101, "enabled": true, "gainDb": 0.0 },
+      { "from": 1, "to": 102, "enabled": true, "gainDb": 0.0 },
+      { "from": 2, "to": 100, "enabled": true, "gainDb": 0.0 },
+      { "from": 2, "to": 101, "enabled": true, "gainDb": -3.0 },
+      { "from": 3, "to": 100, "enabled": true, "gainDb": 0.0 },
+      { "from": 3, "to": 101, "enabled": true, "gainDb": 0.0 }
+    ]
+  },
+  "hardware": {
+    "serial": { "enabled": true, "port": "auto", "baud": 115200 },
+    "map": [],
+    "display": { "ledBrightness": 64, "oledContrast": 200 },
+    "midi": { "input": "", "output": "", "mappings": [] }
+  },
+  "ui": {
+    "theme": "midnight-glass",
+    "panels": {
+      "inputs":  { "dock": "center", "visible": true },
+      "buses":   { "dock": "bottom", "visible": true, "size": 360 },
+      "matrix":  { "dock": "right",  "visible": false, "size": 420 },
+      "plugins": { "dock": "left",   "visible": false, "size": 280 }
+    },
+    "strip": {
+      "template": ["header", "source", "mode", "eq", "inserts", "sends", "pan", "gain", "buttons"],
+      "gainStyle": "fader",
+      "width": 104
+    },
+    "stripOverrides": {}
+  }
+}

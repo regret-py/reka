@@ -1,0 +1,21 @@
+# Build trees
+/build*/
+/out/
+/cmake-build-*/
+CMakeUserPresets.json
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# PlatformIO
+firmware/.pio/
+firmware/.pioenvs/
+firmware/.piolibdeps/
+
+# OS junk
+.DS_Store
+Thumbs.db
