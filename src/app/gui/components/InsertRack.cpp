@@ -5,20 +5,19 @@
 
 namespace reka::app {
 
-class InsertRack::Slot final : public juce::Component {
+class InsertRack::Slot final : public juce::Component, public juce::SettableTooltipClient {
 public:
     Slot(InsertRack& rack, int index, InsertSlotPtr slot) : rack_(rack), index_(index), slot_(std::move(slot)) {
-        bypass_.setClickingTogglesState(true);
-        bypass_.setTooltip("Bypass (latency-compensated)");
-        bypass_.onClick = [this] { slot_->bypassed.store(!bypass_.getToggleState()); };
-        addAndMakeVisible(bypass_);
+        setTooltip("Click: open editor   |   LED: bypass (latency-compensated)   |   Right-click: options");
         refresh();
     }
 
     void refresh() {
-        bypass_.setToggleState(!slot_->bypassed.load(), juce::dontSendNotification);
-        failed_ = slot_->processor->hasFailed();
-        repaint();
+        const bool failed = slot_->processor->hasFailed();
+        const bool bypassed = slot_->bypassed.load();
+        if (failed != failed_ || bypassed != bypassed_) repaint();
+        failed_ = failed;
+        bypassed_ = bypassed;
     }
 
     void paint(juce::Graphics& g) override {
@@ -26,7 +25,12 @@ public:
         auto area = getLocalBounds().toFloat().reduced(1.0f);
         g.setColour(failed_ ? theme.colour("error").withAlpha(0.35f) : theme.colour("button"));
         g.fillRoundedRectangle(area, theme.metrics.controlRadius * 0.6f);
-        area.removeFromLeft(18.0f);
+        // Power LED: lit = processing, dark = bypassed.
+        const auto led = area.removeFromLeft(18.0f).withSizeKeepingCentre(8.0f, 8.0f);
+        g.setColour(bypassed_ ? theme.colour("knobTrack") : theme.colour("fx"));
+        g.fillEllipse(led);
+        g.setColour(theme.colour("panelBorder"));
+        g.drawEllipse(led, 1.0f);
         const auto& descriptor = slot_->processor->descriptor();
         if (descriptor.sandboxed) {
             g.setColour(theme.colour("success").withAlpha(0.8f));
@@ -38,11 +42,17 @@ public:
                          area.reduced(3.0f, 0.0f).toNearestInt(), juce::Justification::centredLeft, 1, 0.8f);
     }
 
-    void resized() override { bypass_.setBounds(getLocalBounds().removeFromLeft(18).reduced(3)); }
-
     void mouseUp(const juce::MouseEvent& event) override {
-        if (event.mods.isPopupMenu()) rack_.showSlotMenu(index_);
-        else if (!event.mouseWasDraggedSinceMouseDown()) rack_.app_.plugins().showEditor(*slot_->processor);
+        if (event.mods.isPopupMenu()) {
+            rack_.showSlotMenu(index_);
+        } else if (event.mouseWasDraggedSinceMouseDown()) {
+            return;
+        } else if (event.x < 18) {
+            slot_->bypassed.store(!slot_->bypassed.load());
+            refresh();
+        } else {
+            rack_.app_.plugins().showEditor(*slot_->processor);
+        }
     }
 
     const InsertSlotPtr& slot() const noexcept { return slot_; }
@@ -51,8 +61,8 @@ private:
     InsertRack& rack_;
     int index_;
     InsertSlotPtr slot_;
-    juce::ToggleButton bypass_;
     bool failed_ = false;
+    bool bypassed_ = false;
 };
 
 InsertRack::InsertRack(AppServices& app, RekaGuiEngine& gui, StripId strip) : app_(app), gui_(gui), strip_(strip) {
