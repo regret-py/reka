@@ -189,7 +189,7 @@ void RekaLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int widt
     for (float db : {12.0f, 6.0f, 0.0f, -6.0f, -10.0f, -20.0f, -30.0f, -40.0f, -60.0f}) {
         const float position = FaderLaw::dbToPosition(db);
         const float ty = bottom - position * (bottom - top);
-        g.setColour(theme_.colour("textDim").withAlpha(db == 0.0f ? 0.9f : 0.45f));
+        g.setColour(theme_.colour("textDim").withAlpha(std::abs(db) < 0.01f ? 0.9f : 0.45f));
         g.drawHorizontalLine(juce::roundToInt(ty), area.getX() + 2.0f, area.getCentreX() - trackWidth - 3.0f);
         g.drawHorizontalLine(juce::roundToInt(ty), area.getCentreX() + trackWidth + 3.0f, area.getRight() - 2.0f);
     }

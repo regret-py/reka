@@ -15,6 +15,7 @@ class RekaGuiEngine;
 class InsertRack final : public juce::Component, public juce::DragAndDropTarget {
 public:
     InsertRack(AppServices& app, RekaGuiEngine& gui, StripId strip);
+    ~InsertRack() override;
 
     void rebuild();
     void refresh();  // bypass / failed states

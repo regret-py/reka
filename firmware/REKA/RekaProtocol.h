@@ -72,7 +72,7 @@ enum ChannelFlags {
     FLAG_MAPPED    = 0x08,  // a strip is bound to this physical channel
     FLAG_SELECTED  = 0x10,
     FLAG_CLIP      = 0x20,  // sticky clip indicator (host clears it)
-    FLAG_SOLO_SAFE = 0x40,  // channel is implicitly muted by another channel's solo
+    FLAG_SOLO_IMPLIED_MUTE = 0x40,  // channel is silenced because another channel is soloed (solo-in-place)
 };
 
 enum Capability {
@@ -146,7 +146,9 @@ inline size_t cobsDecode(const uint8_t* in, size_t length, uint8_t* out, size_t 
 }
 
 // ---- Value helpers ------------------------------------------------------------------------------------
-inline uint16_t readU16(const uint8_t* p) { return static_cast<uint16_t>((p[0] << 8) | p[1]); }
+inline uint16_t readU16(const uint8_t* p) {
+    return static_cast<uint16_t>((static_cast<uint16_t>(p[0]) << 8) | static_cast<uint16_t>(p[1]));
+}
 inline int16_t  readI16(const uint8_t* p) { return static_cast<int16_t>(readU16(p)); }
 
 // Desktop side: dBFS -> meter byte.
@@ -256,7 +258,7 @@ public:
 
 private:
     uint8_t encoded_[kMaxEncodedFrame];
-    uint8_t raw_[kMaxRawFrame + 1];
+    uint8_t raw_[kMaxRawFrame];  // type + at most kMaxPayload bytes + crc
     uint8_t encodedLength_;
     uint8_t rawLength_;
     bool discarding_;

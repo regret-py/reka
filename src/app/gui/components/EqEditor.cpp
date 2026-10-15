@@ -16,9 +16,9 @@ bool usesGain(FilterType type) {
 }
 }  // namespace
 
-EqEditor::EqEditor(RekaLookAndFeel& lookAndFeel, EqParameters& eq, std::shared_ptr<void> keepAlive, double sampleRate,
+EqEditor::EqEditor(RekaLookAndFeel& lnf, EqParameters& eq, std::shared_ptr<void> keepAlive, double sampleRate,
                    juce::String title)
-    : lookAndFeel_(lookAndFeel), eq_(eq), keepAlive_(std::move(keepAlive)), sampleRate_(sampleRate), title_(std::move(title)) {
+    : lookAndFeel_(lnf), eq_(eq), keepAlive_(std::move(keepAlive)), sampleRate_(sampleRate), title_(std::move(title)) {
     bands_ = eq_.bands();
     seenVersion_ = eq_.version();
 
@@ -146,18 +146,20 @@ void EqEditor::paint(juce::Graphics& g) {
                    juce::Rectangle<float>(x - 20.0f, area.getBottom() - 12.0f, 40.0f, 12.0f), juce::Justification::centred);
     }
     for (float db : {-12.0f, -6.0f, 0.0f, 6.0f, 12.0f}) {
-        g.setColour(theme.colour("panelBorder").withMultipliedAlpha(db == 0.0f ? 2.0f : 1.0f));
+        g.setColour(theme.colour("panelBorder").withMultipliedAlpha(std::abs(db) < 0.01f ? 2.0f : 1.0f));
         g.drawHorizontalLine(juce::roundToInt(gainToY(db)), area.getX(), area.getRight());
     }
 
     // Total response
     juce::Path curve;
     const bool active = eq_.enabled();
+    bool first = true;
     for (float x = area.getX(); x <= area.getRight(); x += 1.5f) {
         const float db = active ? static_cast<float>(eqMagnitudeDb(bands_, xToFrequency(x), sampleRate_)) : 0.0f;
         const float y = juce::jlimit(area.getY(), area.getBottom(), gainToY(db));
-        if (x == area.getX()) curve.startNewSubPath(x, y);
+        if (first) curve.startNewSubPath(x, y);
         else curve.lineTo(x, y);
+        first = false;
     }
     g.setColour(theme.colour("accent").withAlpha(active ? 1.0f : 0.35f));
     g.strokePath(curve, juce::PathStrokeType(2.0f));

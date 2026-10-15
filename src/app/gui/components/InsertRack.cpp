@@ -62,6 +62,8 @@ InsertRack::InsertRack(AppServices& app, RekaGuiEngine& gui, StripId strip) : ap
     rebuild();
 }
 
+InsertRack::~InsertRack() = default;
+
 void InsertRack::rebuild() {
     slots_.clear();
     if (const StripInfo* info = app_.mixer().strip(strip_)) {

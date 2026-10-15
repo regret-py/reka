@@ -68,7 +68,8 @@ private:
 class AudioTab final : public Tab {
 public:
     AudioTab(AppServices& app, RekaGuiEngine& gui) : Tab(app, gui), secondaryModel_(gui) {
-        heading(masterHeading_ = label("Master device (clocks the engine)"));
+        masterHeading_ = &label("Master device (clocks the engine)");
+        heading(*masterHeading_);
         auto& devices = app_.devices();
         type_.addItem("Software clock (virtual I/O only)", 1);
         int id = 2;
@@ -84,7 +85,8 @@ public:
             refreshStatus();
         };
 
-        heading(secondaryHeading_ = label("Secondary devices (drift-corrected, any sample rate)"));
+        secondaryHeading_ = &label("Secondary devices (drift-corrected, any sample rate)");
+        heading(*secondaryHeading_);
         secondaryList_.setModel(&secondaryModel_);
         for (const auto& name : devices.typeNames()) secType_.addItem(name, secType_.getNumItems() + 1);
         secType_.onChange = [this] { refreshSecondaryDevices(); };
@@ -124,7 +126,7 @@ public:
 
     void resized() override {
         Rows rows{getLocalBounds().reduced(16)};
-        masterHeading_.setBounds(rows.full(24));
+        masterHeading_->setBounds(rows.full(24));
         type_.setBounds(rows.next(label0(), 28));
         input_.setBounds(rows.next(label1()));
         output_.setBounds(rows.next(label2()));
@@ -135,7 +137,7 @@ public:
         apply_.setBounds(applyRow.removeFromLeft(140));
         status_.setBounds(applyRow.withTrimmedLeft(10));
         rows.full(8);
-        secondaryHeading_.setBounds(rows.full(24));
+        secondaryHeading_->setBounds(rows.full(24));
         auto addRow = rows.full();
         secType_.setBounds(addRow.removeFromLeft(170).withTrimmedRight(4));
         secDirection_.setBounds(addRow.removeFromLeft(150).withTrimmedRight(4));
@@ -236,7 +238,8 @@ private:
         refreshSecondaries();
     }
 
-    juce::Label masterHeading_, secondaryHeading_;
+    juce::Label* masterHeading_ = nullptr;
+    juce::Label* secondaryHeading_ = nullptr;
     juce::Array<juce::Label*> fieldLabels_;
     juce::ComboBox type_, input_, output_, rate_, buffer_;
     juce::TextButton apply_{"Apply"};
@@ -251,7 +254,8 @@ private:
 class VirtualTab final : public Tab {
 public:
     VirtualTab(AppServices& app, RekaGuiEngine& gui) : Tab(app, gui), model_(gui) {
-        heading(heading_ = label("REKA virtual endpoints"));
+        heading_ = &label("REKA virtual endpoints");
+        heading(*heading_);
         name_.setText("REKA Input 3", juce::dontSendNotification);
         flow_.addItem("Input - apps play into it (Windows playback device)", 1);
         flow_.addItem("Output - apps record from it (Windows recording device)", 2);
@@ -272,7 +276,8 @@ public:
             if (row >= 0 && row < static_cast<int>(entries.size())) app_.virtualIo().remove(entries[static_cast<std::size_t>(row)].key);
             refreshList();
         };
-        heading(appsHeading_ = label("Per-application capture (WASAPI process loopback)"));
+        appsHeading_ = &label("Per-application capture (WASAPI process loopback)");
+        heading(*appsHeading_);
         refreshApps_.onClick = [this] { refreshApps(); };
         captureApp_.onClick = [this] {
             if (apps_.getText().isEmpty()) return;
@@ -293,7 +298,7 @@ public:
 
     void resized() override {
         Rows rows{getLocalBounds().reduced(16)};
-        heading_.setBounds(rows.full(24));
+        heading_->setBounds(rows.full(24));
         driver_.setBounds(rows.full(22));
         auto create = rows.full();
         name_.setBounds(create.removeFromLeft(160).withTrimmedRight(4));
@@ -302,7 +307,7 @@ public:
         list_.setBounds(rows.full(130));
         remove_.setBounds(rows.full(26).removeFromLeft(150));
         rows.full(6);
-        appsHeading_.setBounds(rows.full(24));
+        appsHeading_->setBounds(rows.full(24));
         auto appRow = rows.full();
         captureApp_.setBounds(appRow.removeFromRight(130));
         refreshApps_.setBounds(appRow.removeFromRight(90).withTrimmedRight(4));
@@ -358,7 +363,9 @@ private:
 
     void timerCallback() override { refreshList(); }
 
-    juce::Label heading_, appsHeading_, driver_, cables_;
+    juce::Label* heading_ = nullptr;
+    juce::Label* appsHeading_ = nullptr;
+    juce::Label driver_, cables_;
     juce::TextEditor name_;
     juce::ComboBox flow_, apps_;
     juce::TextButton create_{"Create endpoint"}, remove_{"Remove selected"}, refreshApps_{"Refresh"}, captureApp_{"Capture app"},
@@ -371,7 +378,8 @@ private:
 class HardwareTab final : public Tab {
 public:
     HardwareTab(AppServices& app, RekaGuiEngine& gui) : Tab(app, gui), mappingModel_(gui) {
-        heading(serialHeading_ = label("REKA controller (USB serial)"));
+        serialHeading_ = &label("REKA controller (USB serial)");
+        heading(*serialHeading_);
         const auto& s = app_.hardwareSettings();
         enabled_.setToggleState(s.enabled, juce::dontSendNotification);
         port_.addItem("auto", 1);
@@ -395,7 +403,8 @@ public:
             app_.applyHardwareSettings(settings);
         };
 
-        heading(midiHeading_ = label("MIDI control surface"));
+        midiHeading_ = &label("MIDI control surface");
+        heading(*midiHeading_);
         midiIn_.addItem("(none)", 1);
         midiOut_.addItem("(none)", 1);
         id = 2;
@@ -438,7 +447,7 @@ public:
 
     void resized() override {
         Rows rows{getLocalBounds().reduced(16)};
-        serialHeading_.setBounds(rows.full(24));
+        serialHeading_->setBounds(rows.full(24));
         auto r1 = rows.full();
         enabled_.setBounds(r1.removeFromLeft(110));
         port_.setBounds(r1.removeFromLeft(180).withTrimmedRight(4));
@@ -449,7 +458,7 @@ public:
         oled_.setBounds(r2);
         status_.setBounds(rows.full(40));
         rows.full(6);
-        midiHeading_.setBounds(rows.full(24));
+        midiHeading_->setBounds(rows.full(24));
         auto r3 = rows.full();
         midiIn_.setBounds(r3.removeFromLeft(r3.getWidth() / 2).withTrimmedRight(4));
         midiOut_.setBounds(r3);
@@ -479,7 +488,9 @@ private:
         mappings_.repaint();
     }
 
-    juce::Label serialHeading_, midiHeading_, status_;
+    juce::Label* serialHeading_ = nullptr;
+    juce::Label* midiHeading_ = nullptr;
+    juce::Label status_;
     juce::ToggleButton enabled_{"Enabled"};
     juce::ComboBox port_, baud_, midiIn_, midiOut_, strip_, target_;
     juce::HashMap<int, juce::String> midiInIds_, midiOutIds_;
@@ -493,7 +504,8 @@ private:
 class GeneralTab final : public Tab {
 public:
     GeneralTab(AppServices& app, RekaGuiEngine& gui) : Tab(app, gui) {
-        heading(pluginsHeading_ = label("Plugins"));
+        pluginsHeading_ = &label("Plugins");
+        heading(*pluginsHeading_);
         paths_.setText(app_.settings().pluginSearchPath, juce::dontSendNotification);
         paths_.setTextToShowWhenEmpty("VST3 folders, ';'-separated (empty = default locations)", gui.theme().colour("textDim"));
         applyPaths_.onClick = [this] {
@@ -501,7 +513,8 @@ public:
             app_.plugins().setSearchPath(juce::FileSearchPath(paths_.getText()));
             app_.plugins().startScan(false);
         };
-        heading(generalHeading_ = label("General"));
+        generalHeading_ = &label("General");
+        heading(*generalHeading_);
         auto& s = app_.settings();
         startMinimised_.setToggleState(s.startMinimised, juce::dontSendNotification);
         tray_.setToggleState(s.minimiseToTray, juce::dontSendNotification);
@@ -520,12 +533,12 @@ public:
 
     void resized() override {
         Rows rows{getLocalBounds().reduced(16)};
-        pluginsHeading_.setBounds(rows.full(24));
+        pluginsHeading_->setBounds(rows.full(24));
         auto r = rows.full();
         applyPaths_.setBounds(r.removeFromRight(120));
         paths_.setBounds(r.withTrimmedRight(4));
         rows.full(6);
-        generalHeading_.setBounds(rows.full(24));
+        generalHeading_->setBounds(rows.full(24));
         startMinimised_.setBounds(rows.full(24));
         tray_.setBounds(rows.full(24));
         watch_.setBounds(rows.full(24));
@@ -534,7 +547,8 @@ public:
     }
 
 private:
-    juce::Label pluginsHeading_, generalHeading_;
+    juce::Label* pluginsHeading_ = nullptr;
+    juce::Label* generalHeading_ = nullptr;
     juce::TextEditor paths_, log_;
     juce::TextButton applyPaths_{"Apply & scan"}, openData_{"Open REKA data folder"};
     juce::ToggleButton startMinimised_{"Start minimised to the tray"}, tray_{"Closing the window keeps REKA running in the tray"},

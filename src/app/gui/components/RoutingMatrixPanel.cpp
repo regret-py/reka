@@ -77,7 +77,7 @@ void RoutingMatrixPanel::paint(juce::Graphics& g) {
             if (hovered) fill = fill.brighter(0.25f);
             g.setColour(fill);
             g.fillRoundedRectangle(cell.toFloat(), 4.0f);
-            if (route != nullptr && (route->gainDb() != 0.0f || route->preFader() || route->phaseInvert())) {
+            if (route != nullptr && (std::abs(route->gainDb()) > 0.01f || route->preFader() || route->phaseInvert())) {
                 // Non-default send settings: small corner marker.
                 g.setColour(on ? juce::Colours::black.withAlpha(0.6f) : theme.colour("textDim"));
                 g.fillEllipse(cell.toFloat().removeFromTop(6.0f).removeFromRight(6.0f));
@@ -148,7 +148,7 @@ CrosspointEditor::CrosspointEditor(AppServices& app, RekaGuiEngine& gui, StripId
     preFader_.onClick = [raw, this] { raw->setPreFader(preFader_.getToggleState()); };
     phase_.onClick = [raw, this] { raw->setPhaseInvert(phase_.getToggleState()); };
     eq_.onClick = [this, params] {
-        gui_.showEqEditor(params->eq(),
+        gui_.showEqEditor(params->eq(), params,
                           juce::String(app_.mixer().strip(input_)->name) + " -> " + juce::String(app_.mixer().strip(bus_)->name) + " EQ",
                           eq_);
     };

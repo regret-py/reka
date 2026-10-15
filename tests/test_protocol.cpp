@@ -71,6 +71,30 @@ TEST_CASE("FrameWriter refuses oversize payloads") {
     CHECK(writer.finish(frame) == 0);
 }
 
+TEST_CASE("Parser rejects payloads longer than kMaxPayload") {
+    // Hand-build a frame with kMaxPayload + 1 payload bytes (FrameWriter itself refuses to).
+    std::vector<std::uint8_t> raw;
+    raw.push_back(MSG_METERS);
+    for (int i = 0; i < kMaxPayload + 1; ++i) raw.push_back(static_cast<std::uint8_t>(i + 1));
+    raw.push_back(crc8(raw.data(), raw.size()));
+    auto encoded = encodeRaw(raw);
+    encoded.push_back(0);
+    FrameParser parser;
+    bool got = false;
+    for (auto b : encoded) got = got || parser.feed(b);
+    CHECK_FALSE(got);
+
+    // Exactly kMaxPayload is accepted.
+    raw.erase(raw.end() - 2, raw.end());
+    raw.push_back(crc8(raw.data(), raw.size()));
+    encoded = encodeRaw(raw);
+    encoded.push_back(0);
+    got = false;
+    for (auto b : encoded) got = got || parser.feed(b);
+    CHECK(got);
+    CHECK(parser.payloadSize() == kMaxPayload);
+}
+
 TEST_CASE("Parser survives corruption and resynchronises on the next delimiter") {
     FrameWriter writer;
     writer.begin(MSG_PING);

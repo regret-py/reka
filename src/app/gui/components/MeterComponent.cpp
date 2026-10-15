@@ -4,9 +4,9 @@
 
 namespace reka::app {
 
-MeterComponent::MeterComponent(RekaLookAndFeel& lookAndFeel, std::shared_ptr<StripProcessor> processor,
+MeterComponent::MeterComponent(RekaLookAndFeel& lnf, std::shared_ptr<StripProcessor> processor,
                                std::function<float()> integratedLufs)
-    : lookAndFeel_(lookAndFeel),
+    : lookAndFeel_(lnf),
       processor_(std::move(processor)),
       integratedLufs_(std::move(integratedLufs)),
       vblank_(this, [this] { tick(); }) {

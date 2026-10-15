@@ -825,7 +825,7 @@ static void channelColor(uint8_t ch, uint16_t now16, uint8_t* rgb) {
         const uint8_t level = static_cast<uint8_t>(96 + ((static_cast<uint16_t>(tri) * 5U) >> 3));
         rgb[0] = level;
         rgb[1] = scaleBrightness(110, level);
-    } else if (c.flags & reka_proto::FLAG_SOLO_SAFE) {
+    } else if (c.flags & reka_proto::FLAG_SOLO_IMPLIED_MUTE) {
         rgb[0] = 48;  // implicitly muted by another channel's solo: dim red
     } else {
         // Level: green below -30 dB, yellow at -15 dB, red at 0 dB; brighter as the level rises.
@@ -990,7 +990,7 @@ struct OledView {
                     gOled.drawPixel(static_cast<u8g2_uint_t>(x + barWidth / 2), bottom);  // unmapped: a dot
                     continue;
                 }
-                if (c.flags & (reka_proto::FLAG_MUTE | reka_proto::FLAG_SOLO_SAFE)) {
+                if (c.flags & (reka_proto::FLAG_MUTE | reka_proto::FLAG_SOLO_IMPLIED_MUTE)) {
                     gOled.drawFrame(x, top, barWidth, height);  // muted: hollow bar
                     continue;
                 }
@@ -1093,7 +1093,7 @@ struct OledView {
         // Mute / solo / FX-bypass badges
         gOled.setFont(u8g2_font_6x10_tr);
         const uint8_t muteState =
-            (c.flags & reka_proto::FLAG_MUTE) ? 1 : ((c.flags & reka_proto::FLAG_SOLO_SAFE) ? 2 : 0);
+            (c.flags & reka_proto::FLAG_MUTE) ? 1 : ((c.flags & reka_proto::FLAG_SOLO_IMPLIED_MUTE) ? 2 : 0);
         badge(84, 12, F("M"), 1, muteState);
         badge(98, 12, F("S"), 1, (c.flags & reka_proto::FLAG_SOLO) ? 1 : 0);
         badge(112, 16, F("FX"), 2, (c.flags & reka_proto::FLAG_FX_BYPASS) ? 1 : 0);

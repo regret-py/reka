@@ -1,0 +1,29 @@
+{
+  "id": "midnight-glass",
+  "name": "Midnight Glass",
+  "dark": true,
+  "colours": {
+    "background": "#0E1117", "backgroundTop": "#151B28", "backgroundBottom": "#080A0F",
+    "panel": "#1A2030CC", "panelBorder": "#FFFFFF30", "panelHeader": "#8A93A6",
+    "text": "#E6EAF2", "textDim": "#8A93A6",
+    "accent": "#4DA3FF", "accentAlt": "#B47CFF",
+    "mute": "#FF4D5E", "solo": "#FFC94D", "fx": "#41D6A0",
+    "fader": "#2A3142", "faderTrack": "#0A0D12", "faderCap": "#E6EAF2",
+    "knob": "#2A3142", "knobArc": "#4DA3FF", "knobTrack": "#10141C",
+    "button": "#222A3A", "buttonOn": "#4DA3FF",
+    "meterLow": "#2EE6A6", "meterMid": "#FFD24D", "meterHigh": "#FF4D5E",
+    "meterBackground": "#07090D", "meterPeak": "#FFFFFF", "meterRms": "#FFFFFF80", "clip": "#FF2D3D",
+    "matrixOn": "#4DA3FF", "matrixOff": "#1C2230", "selection": "#4DA3FF40",
+    "warning": "#FFB347", "error": "#FF4D5E", "success": "#41D6A0"
+  },
+  "gradients": {
+    "background": { "angle": 90, "stops": [[0.0, "#151B28"], [1.0, "#080A0F"]] },
+    "panel":      { "angle": 90, "stops": [[0.0, "#1E2536E6"], [1.0, "#141924E6"]] }
+  },
+  "glass": { "enabled": true, "blurRadius": 22, "tintOpacity": 0.55, "borderOpacity": 0.16, "highlight": 0.07, "shadow": 0.35 },
+  "metrics": { "cornerRadius": 10, "stripWidth": 104, "stripSpacing": 6, "panelPadding": 8, "fontSize": 13, "headerFontSize": 15, "controlRadius": 6 },
+  "fonts": { "family": "", "monoFamily": "" },
+  "meters": { "style": "peakRms", "decayDbPerSecond": 24, "peakHoldMs": 1500, "floorDb": -60, "midDb": -12, "highDb": -3, "gradient": true, "showLufs": true, "segments": 0 },
+  "controls": { "gainStyle": "fader", "knobArcThickness": 3, "faderCapHeight": 26, "faderTrackWidth": 4 },
+  "window": { "backdrop": "none" }
+}

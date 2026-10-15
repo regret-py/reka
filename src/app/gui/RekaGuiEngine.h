@@ -43,12 +43,14 @@ public:
     // ---- layout ----
     const UiLayout& layout() const noexcept { return layout_; }
     void setLayout(UiLayout layout);
-    void updateLayout(const std::function<void(UiLayout&)>& change);
+    // notify = false is used while dragging splitters (no rebuild of strips mid-drag).
+    void updateLayout(const std::function<void(UiLayout&)>& change, bool notify = true);
 
     // ---- editors & dialogs ----
     void showSettings();
     void showThemeEditor();
-    void showEqEditor(EqParameters& eq, const juce::String& title, juce::Component& anchor);
+    // `owner` keeps the parameter block alive while the editor is open (the strip may be deleted).
+    void showEqEditor(EqParameters& eq, std::shared_ptr<void> owner, const juce::String& title, juce::Component& anchor);
     void showCrosspointEditor(StripId input, StripId bus, juce::Component& anchor);
 
 private:

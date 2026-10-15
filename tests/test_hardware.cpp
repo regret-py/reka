@@ -265,7 +265,7 @@ TEST_CASE("Hardware bridge: handshake, names, faders with pickup, buttons, meter
     REQUIRE(waitFor([&] { return model.parameters(game)->mute(); }));
     REQUIRE(waitFor([&] { return (device.channel(1).flags & proto::FLAG_MUTE) != 0; }));
     model.parameters(game)->setSolo(true);  // solo on screen -> mic is implicitly muted
-    REQUIRE(waitFor([&] { return (device.channel(0).flags & proto::FLAG_SOLO_SAFE) != 0; }));
+    REQUIRE(waitFor([&] { return (device.channel(0).flags & proto::FLAG_SOLO_IMPLIED_MUTE) != 0; }));
     CHECK(controller.lastTouchedChannel() == 1);
 
     REQUIRE(waitFor([&] { return device.meterFrames() > 5; }));

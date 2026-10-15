@@ -428,7 +428,7 @@ void RekaHardwareController::sendFeedback(ISerialPort& port, bool forceAll) {
             if (p.mute()) flags |= proto::FLAG_MUTE;
             if (p.solo()) flags |= proto::FLAG_SOLO;
             if (p.fxBypass()) flags |= proto::FLAG_FX_BYPASS;
-            if (anySolo && !p.solo()) flags |= proto::FLAG_SOLO_SAFE;
+            if (anySolo && !p.solo()) flags |= proto::FLAG_SOLO_IMPLIED_MUTE;
             if (state.clipLatched && now < state.clipUntil) flags |= proto::FLAG_CLIP;
             gain = proto::encodeGainDb(gainDb);
             pickup = state.pickup.hint(position);

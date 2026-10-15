@@ -14,6 +14,7 @@ option(REKA_BUILD_APP          "Build REKA.exe and REKA-PluginHost (requires JUC
 option(REKA_BUILD_TESTS        "Build the reka_core unit tests" ON)
 option(REKA_ENABLE_ASIO        "Enable the ASIO backend (requires the Steinberg ASIO SDK)" OFF)
 option(REKA_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(REKA_BUILD_INTEGRATION_TESTS "Build the plugin-hosting integration test (needs REKA_BUILD_APP)" OFF)
 set(REKA_ASIO_SDK_DIR "" CACHE PATH "Steinberg ASIO SDK root (the folder that contains common/iasiodrv.h)")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -33,4 +34,9 @@ endif()
 if(REKA_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(REKA_BUILD_APP AND REKA_BUILD_INTEGRATION_TESTS)
+    enable_testing()
+    add_subdirectory(tests/integration)
 endif()

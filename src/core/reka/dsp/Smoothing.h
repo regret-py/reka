@@ -3,6 +3,12 @@
 #include <cmath>
 #include <cstring>
 
+// Exact float comparisons below are intentional (ramp endpoints are assigned, never computed).
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+
 namespace reka {
 
 // Linear ramp of a gain across one block.
@@ -97,3 +103,7 @@ inline void addWithGain(float* dest, const float* source, int numFrames, GainSpa
 }
 
 }  // namespace reka
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

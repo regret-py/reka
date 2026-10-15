@@ -82,5 +82,9 @@ target_link_libraries(REKA
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-# The plugin sandbox / scanner executable must sit next to REKA.exe.
+# The plugin sandbox / scanner executable must sit next to REKA.exe (JUCE gives every target its own
+# artefact folder, so copy it over after each build).
 add_dependencies(REKA REKAPluginHost)
+add_custom_command(TARGET REKA POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:REKAPluginHost>" "$<TARGET_FILE_DIR:REKA>"
+    COMMENT "Copying REKA-PluginHost next to REKA")

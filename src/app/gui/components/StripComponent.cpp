@@ -181,7 +181,7 @@ public:
                 params->eq().setEnabled(!params->eq().enabled());
                 return;
             }
-            gui_.showEqEditor(params->eq(), juce::String(app_.mixer().strip(id_)->name) + " - EQ", button_);
+            gui_.showEqEditor(params->eq(), params, juce::String(app_.mixer().strip(id_)->name) + " - EQ", button_);
         };
         addAndMakeVisible(button_);
         refresh();
@@ -467,8 +467,8 @@ void StripComponent::showContextMenu() {
             auto options = juce::MessageBoxOptions::makeOptionsOkCancel(
                 juce::MessageBoxIconType::QuestionIcon, "Delete strip",
                 "Delete \"" + juce::String(app_.mixer().strip(id)->name) + "\" and its plugins?", "Delete", "Cancel", this);
-            juce::AlertWindow::showAsync(options, [&app = app_, id](int result) {
-                if (result == 1) app.mixer().removeStrip(id);
+            juce::AlertWindow::showAsync(options, [&app = app_, id](int answer) {
+                if (answer == 1) app.mixer().removeStrip(id);
             });
         }
     });

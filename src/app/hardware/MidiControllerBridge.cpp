@@ -131,7 +131,8 @@ void MidiControllerBridge::handleIncomingMidiMessage(juce::MidiInput*, const juc
                 case Target::Mute: p.toggleMute(); break;
                 case Target::Solo: p.toggleSolo(); break;
                 case Target::FxBypass: p.toggleFxBypass(); break;
-                default: break;
+                case Target::Gain:
+                case Target::Pan: break;  // continuous targets ignore note messages
             }
         }
     }

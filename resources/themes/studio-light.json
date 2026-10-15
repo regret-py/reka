@@ -1,0 +1,28 @@
+{
+  "id": "studio-light",
+  "name": "Studio Light",
+  "dark": false,
+  "colours": {
+    "background": "#E9ECF1", "backgroundTop": "#F5F7FA", "backgroundBottom": "#DCE1E8",
+    "panel": "#FFFFFFD9", "panelBorder": "#0000001F", "panelHeader": "#5B6475",
+    "text": "#1C2230", "textDim": "#5B6475",
+    "accent": "#2563EB", "accentAlt": "#7C3AED",
+    "mute": "#DC2626", "solo": "#D97706", "fx": "#059669",
+    "fader": "#CBD2DC", "faderTrack": "#B8C0CC", "faderCap": "#3A4352",
+    "knob": "#DDE2EA", "knobArc": "#2563EB", "knobTrack": "#C3CAD5",
+    "button": "#E3E7EE", "buttonOn": "#2563EB",
+    "meterLow": "#10B981", "meterMid": "#F59E0B", "meterHigh": "#EF4444",
+    "meterBackground": "#1C2230", "meterPeak": "#FFFFFF", "meterRms": "#FFFFFF90", "clip": "#EF4444",
+    "matrixOn": "#2563EB", "matrixOff": "#D5DBE4", "selection": "#2563EB33",
+    "warning": "#D97706", "error": "#DC2626", "success": "#059669"
+  },
+  "gradients": {
+    "background": { "angle": 90, "stops": [[0.0, "#F5F7FA"], [1.0, "#DCE1E8"]] },
+    "panel":      { "angle": 90, "stops": [[0.0, "#FFFFFFEE"], [1.0, "#F2F4F8EE"]] }
+  },
+  "glass": { "enabled": false, "blurRadius": 0, "tintOpacity": 1.0, "borderOpacity": 0.12, "highlight": 0.0, "shadow": 0.15 },
+  "metrics": { "cornerRadius": 6, "stripWidth": 100, "stripSpacing": 6, "panelPadding": 8, "fontSize": 13, "headerFontSize": 15, "controlRadius": 4 },
+  "meters": { "style": "peakRms", "decayDbPerSecond": 20, "peakHoldMs": 2000, "floorDb": -60, "midDb": -18, "highDb": -6, "gradient": false, "showLufs": true, "segments": 0 },
+  "controls": { "gainStyle": "fader", "knobArcThickness": 3, "faderCapHeight": 24, "faderTrackWidth": 3 },
+  "window": { "backdrop": "none" }
+}

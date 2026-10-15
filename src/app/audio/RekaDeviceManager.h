@@ -27,7 +27,7 @@ struct MasterSetup {
 
     bool operator==(const MasterSetup& other) const {
         return type == other.type && input == other.input && output == other.output &&
-               sampleRate == other.sampleRate && bufferSize == other.bufferSize;
+               juce::approximatelyEqual(sampleRate, other.sampleRate) && bufferSize == other.bufferSize;
     }
     nlohmann::json toJson() const;
     static MasterSetup fromJson(const nlohmann::json& json);
