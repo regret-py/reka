@@ -1,9 +1,23 @@
-# Construit « REKA.exe » sur une machine Windows de GitHub à chaque push,
-# après les tests, et le publie dans une release téléchargeable.
+# Construit « REKA.exe » sur une machine Windows de GitHub, après les tests.
+#
+# - Branche principale (la branche par défaut du dépôt) : l'exe est publié dans
+#   l'UNIQUE release du dépôt, « build-latest », puis les anciennes releases de
+#   build sont supprimées.
+# - Autres branches : tests + exe en artefact du run (onglet Actions), sans release.
+#
+# Mises à jour automatiques — à ne pas casser :
+#   chaque REKA.exe lit https://github.com/<dépôt>/releases/download/build-latest/version.json
+#   et s'y met à jour si le numéro de build en ligne est plus grand que le sien.
+#   Ce numéro est le numéro de run de CE workflow : ne renomme pas ce fichier
+#   (le compteur repartirait à 1 et aucun REKA installé ne verrait plus les
+#   nouveaux builds), ne supprime pas la release « build-latest », et ne crée
+#   jamais de dépôt sous un ancien nom (regret-py/rekav2) : les exe d'avant le
+#   renommage en « reka » passent par la redirection de GitHub.
 name: Build Windows
 
 on:
   push:
+    branches: ["**"]      # pas les tags (dont build-latest, déplacé à chaque publication)
     paths:
       - "reaper_mixer/**"
       - ".github/workflows/build-windows.yml"
@@ -12,9 +26,11 @@ on:
 permissions:
   contents: write
 
+# Un nouveau push annule le build en cours de la même branche, sauf sur la
+# branche principale : une publication n'est jamais coupée en plein milieu
 concurrency:
   group: build-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 jobs:
   tests-linux:
@@ -49,6 +65,8 @@ jobs:
         shell: bash
     env:
       QT_QPA_PLATFORM: offscreen
+      # Publication uniquement depuis la branche principale
+      PUBLISH: ${{ github.ref_name == github.event.repository.default_branch }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,8 +82,7 @@ jobs:
           import json, os, re
           source = open("core/config.py", encoding="utf-8").read()
           version = re.search(r'^APP_VERSION = "([^"]+)"', source, re.M).group(1)
-          # Canal commun à toutes les branches : un exe voit tout build plus récent,
-          # quelle que soit la branche qui l'a produit
+          # Canal unique « build-latest » : c'est là que tout REKA.exe cherche ses mises à jour
           info = {"version": version, "build": int(os.environ["GITHUB_RUN_NUMBER"]),
                   "commit": os.environ["GITHUB_SHA"], "repo": os.environ["GITHUB_REPOSITORY"],
                   "tag": "build-latest"}
@@ -90,25 +107,27 @@ jobs:
           grep -q "RÉSULTAT : OK" selftest/console.txt
           ls -la dist selftest
       - name: Description de la mise à jour (version.json)
+        env:
+          PYTHONUTF8: "1"       # notes (accents, symboles) en UTF-8, pas en cp1252
         run: |
           python - <<'PY'
-          import datetime, hashlib, json, os, subprocess
+          import datetime, hashlib, json, subprocess
           info = json.load(open("build_info.json", encoding="utf-8"))
           data = open("dist/REKA.exe", "rb").read()
+          # Nouveautés : titre du commit, ou de la pull request pour un merge
+          message = subprocess.check_output(["git", "log", "-1", "--format=%B"],
+                                            encoding="utf-8").strip()   # git écrit en UTF-8
+          lines = [line.strip() for line in message.splitlines() if line.strip()]
+          notes = lines[0] if lines else ""
+          if notes.startswith("Merge pull request") and len(lines) > 1:
+              notes = lines[1]
           info.update(
-              sha256=hashlib.sha256(data).hexdigest(), size=len(data),
-              notes=subprocess.check_output(["git", "log", "-1", "--format=%s"],
-                                            encoding="utf-8").strip(),   # git écrit en UTF-8
-              published=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"))
-          # Un version.json par release, chacun pointant vers l'exe de SA release :
-          # « build-latest » (commune) et « build-<branche> » (lue par les anciens exe)
-          branch_tag = "build-" + os.environ["GITHUB_REF_NAME"].replace("/", "-")
-          for folder, tag in (("dist", info["tag"]), ("dist/branch", branch_tag)):
-              os.makedirs(folder, exist_ok=True)
-              out = dict(info, url=f"https://github.com/{info['repo']}/releases/download/{tag}/REKA.exe")
-              json.dump(out, open(f"{folder}/version.json", "w", encoding="utf-8"),
-                        ensure_ascii=False, indent=2)
-              print(json.dumps(out, ensure_ascii=False, indent=2))
+              sha256=hashlib.sha256(data).hexdigest(), size=len(data), notes=notes,
+              published=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              url=f"https://github.com/{info['repo']}/releases/download/{info['tag']}/REKA.exe")
+          json.dump(info, open("dist/version.json", "w", encoding="utf-8"),
+                    ensure_ascii=False, indent=2)
+          print(json.dumps(info, ensure_ascii=False, indent=2))
           PY
       - name: Artefact
         uses: actions/upload-artifact@v4
@@ -118,44 +137,74 @@ jobs:
             reaper_mixer/dist/REKA.exe
             reaper_mixer/dist/version.json
             reaper_mixer/selftest/
-      - name: Release « build-<branche> »
-        if: github.event_name == 'push'
+      - name: Release « build-latest » (mises à jour de tous les REKA)
+        if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          PYTHONUTF8: "1"
         run: |
-          tag="build-${GITHUB_REF_NAME//\//-}"
-          gh release delete "$tag" --yes --cleanup-tag || true
-          gh release create "$tag" dist/REKA.exe dist/branch/version.json selftest/console.png \
-            --prerelease --target "$GITHUB_SHA" \
-            --title "REKA — dernier build ($GITHUB_REF_NAME)" \
-            --notes "Exécutable Windows construit automatiquement depuis $GITHUB_SHA.
+          set -euo pipefail
+          tag=build-latest
+          python - <<'PY'
+          import json, os
+          info = json.load(open("dist/version.json", encoding="utf-8"))
+          notes = f"""Dernière version de REKA (build {info['build']}, commit {os.environ['GITHUB_SHA'][:7]}).
 
-          Télécharge **REKA.exe** et lance-le. Il faut Voicemeeter (Potato ou Banana) et REAPER installés.
+          **Installer** : télécharge **REKA.exe** ci-dessous et lance-le. Il faut Voicemeeter
+          (Potato ou Banana), et REAPER ou FL Studio pour les effets.
+          Pour voir la console sans eux : `REKA.exe --demo`.
+
+          **Mises à jour** : REKA se met à jour tout seul depuis cette release.
+
+          Nouveautés : {info['notes']}
+
           REKA est développé par Regrettable et Zerka. Merci à 206 pour sa contribution.
-          Pour voir la console sans eux : \`REKA.exe --demo\`.
-          console.png : rendu de l'auto-test fait par ce build."
-      - name: Release commune « build-latest » (mises à jour de tous les exe)
-        if: github.event_name == 'push'
+          console.png : rendu de l'auto-test fait par ce build.
+          """
+          open("release_notes.md", "w", encoding="utf-8").write(notes)
+          open("release_title.txt", "w", encoding="utf-8").write(
+              f"REKA {info['version']} (build {info['build']})")
+          PY
+          title=$(cat release_title.txt)
+          build=$GITHUB_RUN_NUMBER
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            # Relance d'un ancien run : un build plus récent est déjà en ligne, on le garde
+            mkdir -p online
+            if gh release download "$tag" -p version.json -D online --clobber 2>/dev/null; then
+              online=$(python -c "import json; print(json.load(open('online/version.json', encoding='utf-8'))['build'])")
+              if [ "$online" -gt "$build" ]; then
+                echo "build-latest contient déjà le build $online : rien à publier"; exit 0
+              fi
+            fi
+            # Mise à jour sur place : la release ne disparaît jamais, même si le run
+            # s'arrête en route. L'exe d'abord, version.json en dernier : un REKA qui
+            # lit le nouveau version.json trouve forcément le nouvel exe.
+            gh release upload "$tag" dist/REKA.exe selftest/console.png --clobber
+            gh release upload "$tag" dist/version.json --clobber
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/$tag" \
+              -f sha="$GITHUB_SHA" -F force=true >/dev/null
+            gh release edit "$tag" --title "$title" --notes-file release_notes.md \
+              --prerelease=false --latest
+          else
+            gh release create "$tag" dist/REKA.exe selftest/console.png dist/version.json \
+              --target "$GITHUB_SHA" --title "$title" --notes-file release_notes.md --latest
+          fi
+      - name: Ménage — une seule release
+        if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Un build d'une autre branche plus récent est déjà publié : on le garde
-          mkdir -p latest
-          if gh release download build-latest -p version.json -D latest 2>/dev/null; then
-            online=$(python -c "import json; print(json.load(open('latest/version.json'))['build'])")
-            if [ "$online" -gt "$GITHUB_RUN_NUMBER" ]; then
-              echo "build-latest contient déjà le build $online : rien à publier"; exit 0
-            fi
-          fi
-          gh release delete build-latest --yes --cleanup-tag || true
-          gh release create build-latest dist/REKA.exe dist/version.json selftest/console.png \
-            --prerelease --target "$GITHUB_SHA" \
-            --title "REKA — dernier build (toutes branches)" \
-            --notes "Dernier exe construit ($GITHUB_REF_NAME, $GITHUB_SHA). REKA s'y met à jour automatiquement."
-          # Anciens exe (qui consultent encore build-<autre branche>) : leur
-          # version.json annonce aussi ce build, téléchargé depuis build-latest
-          own="build-${GITHUB_REF_NAME//\//-}"
+          # Anciennes releases de build (build-<branche>…) et leurs tags : supprimées.
+          # Seule « build-latest » reste : c'est celle que lisent les REKA installés.
           gh release list --limit 100 --json tagName --jq '.[].tagName' | while read -r tag; do
-            case "$tag" in build-latest|"$own") continue ;; build-*) ;; *) continue ;; esac
-            gh release upload "$tag" dist/version.json --clobber || echo "version.json non mis à jour : $tag"
+            case "$tag" in build-latest) continue ;; build-*) ;; *) continue ;; esac
+            echo "Suppression de la release $tag"
+            gh release delete "$tag" --yes --cleanup-tag || echo "::warning::release $tag non supprimée"
+          done
+          # Tags de build restés sans release
+          gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/build-" --jq '.[].ref' | while read -r ref; do
+            [ "$ref" = refs/tags/build-latest ] && continue
+            echo "Suppression du tag ${ref#refs/tags/}"
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/$ref" || echo "::warning::tag $ref non supprimé"
           done

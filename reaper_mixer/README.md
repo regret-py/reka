@@ -8,13 +8,18 @@ tous les deux cachés en arrière-plan. L'utilisateur ne voit que la console.
 
 Développé par **Regrettable** et **Zerka**. Merci à **206** pour sa contribution.
 
-![console](https://github.com/regret-py/rekav2/releases/download/build-claude-charming-hawking-bll4o5/console.png)
+![console](https://github.com/regret-py/reka/releases/download/build-latest/console.png)
 
 ## Télécharger l'exécutable
 
-Chaque push construit automatiquement `REKA.exe` sur une machine Windows de GitHub
-(onglet **Actions**, workflow *Build Windows*) et le publie dans une release
-**build-&lt;branche&gt;** (onglet **Releases**). Rien à installer pour le compiler.
+**[REKA.exe](https://github.com/regret-py/reka/releases/download/build-latest/REKA.exe)** :
+la dernière version, dans l'unique release du dépôt (onglet **Releases**). REKA se met
+ensuite à jour tout seul.
+
+Chaque push construit `REKA.exe` sur une machine Windows de GitHub (onglet **Actions**,
+workflow *Build Windows*), après les tests. Sur la branche principale, l'exe est publié
+dans la release **build-latest**, où tous les REKA installés cherchent leurs mises à
+jour ; sur une autre branche, il reste téléchargeable dans les artefacts du run.
 
 ## Prérequis
 
@@ -112,6 +117,12 @@ indique s'il est installé sur le PC et le délai qu'il ajoute à la voix. On le
   `Include: reka.txt` à `config.txt` : le reste de ta configuration n'est pas touché. Les
   réglages des plugins faits dans l'éditeur d'Equalizer APO sont conservés.
 
+Si le moteur d'effets ne démarre pas (FL Studio ou REAPER qui plante au lancement,
+installation cassée, pont REAPER qui ne répond pas), REKA ne reste pas bloqué : il propose
+**Continuer sans effets** (la console s'ouvre, Voicemeeter seul, pour cette session),
+**Changer de moteur d'effets…**, ou **Réessayer**. Au prochain lancement, le moteur choisi
+est de nouveau essayé ; `REKA.exe --setup` rouvre aussi le menu de sélection.
+
 ## Délai de la voix
 
 - Chaque strip affiche à côté de *Effets* le délai ajouté par ses plugins actifs
@@ -171,8 +182,18 @@ apparaît dans le panneau Master :
   version** (REKA ne la propose plus, sauf recherche manuelle).
 
 ⚙ → **À propos** : version et numéro de build, **Rechercher une mise à jour**, et l'option
-**Vérifier les mises à jour au démarrage**. Chaque build GitHub publie, à côté de
-`REKA.exe`, un `version.json` (numéro de build, taille, empreinte) que REKA consulte.
+**Vérifier les mises à jour au démarrage**. Chaque build de la branche principale publie,
+à côté de `REKA.exe` dans la release **build-latest**, un `version.json` (numéro de build,
+taille, empreinte) que REKA consulte.
+
+Pour ne pas casser les mises à jour des REKA déjà installés :
+
+- garder le tag et la release `build-latest` (ne pas la supprimer à la main) ;
+- ne pas renommer `.github/workflows/build-windows.yml` : le numéro de build est le
+  numéro de run de ce workflow, il repartirait à 1 ;
+- ne jamais recréer un dépôt sous un ancien nom (`regret-py/rekav2`) : les REKA construits
+  avant le renommage en `reka` y cherchent leurs mises à jour et n'y arrivent que grâce à
+  la redirection automatique de GitHub, qu'un nouveau dépôt de ce nom supprimerait.
 
 ## Musique en cours
 
@@ -317,9 +338,14 @@ reaper_mixer/
 │   ├── config.py           config.json (défauts + %APPDATA%\REKA), chemins
 │   ├── process_manager.py  moteurs (recherche, lancement, masquage, arrêt), projet REAPER
 │   ├── voicemeeter_ctrl.py faders, mutes, routing, envois, insert, VU (30 Hz)
+│   ├── effects.py          moteurs d'effets au choix (REAPER, FL Studio, Equalizer APO, aucun)
 │   ├── reaper_ctrl.py      liaison avec le pont Lua (effets, pistes, projet, carte son)
+│   ├── flstudio_ctrl.py    moteur FL Studio
+│   ├── apo_ctrl.py         moteur Equalizer APO
 │   ├── vst_scanner.py      liste des plugins (REAPER, cache, dossiers VST3)
+│   ├── app_volume.py       volume par application (sessions audio Windows)
 │   ├── media.py            musique en cours (contrôles média de Windows, WinRT)
+│   ├── updater.py          mises à jour (version.json de la release build-latest)
 │   └── demo.py             moteurs simulés (--demo, --selftest)
 ├── ui/                     fenêtre, strips, master, knob/fader/VU dessinés, dialogues
 ├── assets/                 logo et icône REKA, police Inter, pont Lua
