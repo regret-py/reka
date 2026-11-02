@@ -5,19 +5,19 @@
 <h3 align="center">La console de mixage tout-en-un pour Voicemeeter,<br>avec effets VST en temps réel.</h3>
 
 <p align="center">
-  <a href="https://github.com/regret-py/reka/releases/tag/build-latest"><img src="https://img.shields.io/github/v/release/regret-py/reka?display_name=release&style=flat-square&label=version&color=2f81f7" alt="Version"></a>
-  <a href="https://github.com/regret-py/reka/actions/workflows/build-windows.yml"><img src="https://github.com/regret-py/reka/actions/workflows/build-windows.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/regret1337/reka/releases/tag/build-latest"><img src="https://img.shields.io/github/v/release/regret1337/reka?display_name=release&style=flat-square&label=version&color=2f81f7" alt="Version"></a>
+  <a href="https://github.com/regret1337/reka/actions/workflows/build-windows.yml"><img src="https://github.com/regret1337/reka/actions/workflows/build-windows.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/Qt-6-41CD52?style=flat-square&logo=qt&logoColor=white" alt="Qt 6">
 </p>
 
 <p align="center">
-  <a href="https://github.com/regret-py/reka/releases/download/build-latest/REKA.exe"><img src="https://img.shields.io/badge/T%C3%A9l%C3%A9charger-REKA.exe-2ea043?style=for-the-badge&logo=windows&logoColor=white" alt="Télécharger REKA.exe"></a>
+  <a href="https://github.com/regret1337/reka/releases/download/build-latest/REKA.exe"><img src="https://img.shields.io/badge/T%C3%A9l%C3%A9charger-REKA.exe-2ea043?style=for-the-badge&logo=windows&logoColor=white" alt="Télécharger REKA.exe"></a>
 </p>
 
 <p align="center">
-  <img src="https://github.com/regret-py/reka/releases/download/build-latest/console.png" alt="La console REKA" width="880">
+  <img src="https://github.com/regret1337/reka/releases/download/build-latest/console.png" alt="La console REKA" width="880">
 </p>
 
 ---
@@ -48,7 +48,7 @@ musique, appels, jeu, Discord, OBS : chaque source a sa strip, ses effets et ses
 
 ## Installation
 
-1. **[Télécharge REKA.exe](https://github.com/regret-py/reka/releases/download/build-latest/REKA.exe)** :
+1. **[Télécharge REKA.exe](https://github.com/regret1337/reka/releases/download/build-latest/REKA.exe)** :
    un seul fichier, rien à installer.
 2. **Lance-le.** Au premier démarrage, REKA te demande ton édition de Voicemeeter et ton
    moteur d'effets, en indiquant ce qui est déjà installé sur ton PC.
