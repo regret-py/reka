@@ -10,7 +10,9 @@
 #   et s'y met à jour si le numéro de build en ligne est plus grand que le sien.
 #   Ce numéro est le numéro de run de CE workflow : ne renomme pas ce fichier
 #   (le compteur repartirait à 1 et aucun REKA installé ne verrait plus les
-#   nouveaux builds), ni le tag « build-latest », ni le dépôt.
+#   nouveaux builds), ne supprime pas la release « build-latest », et ne crée
+#   jamais de dépôt sous un ancien nom (regret-py/rekav2) : les exe d'avant le
+#   renommage en « reka » passent par la redirection de GitHub.
 name: Build Windows
 
 on:

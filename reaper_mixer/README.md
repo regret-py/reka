@@ -8,11 +8,11 @@ tous les deux cachés en arrière-plan. L'utilisateur ne voit que la console.
 
 Développé par **Regrettable** et **Zerka**. Merci à **206** pour sa contribution.
 
-![console](https://github.com/regret-py/rekav2/releases/download/build-latest/console.png)
+![console](https://github.com/regret-py/reka/releases/download/build-latest/console.png)
 
 ## Télécharger l'exécutable
 
-**[REKA.exe](https://github.com/regret-py/rekav2/releases/download/build-latest/REKA.exe)** :
+**[REKA.exe](https://github.com/regret-py/reka/releases/download/build-latest/REKA.exe)** :
 la dernière version, dans l'unique release du dépôt (onglet **Releases**). REKA se met
 ensuite à jour tout seul.
 
@@ -186,9 +186,14 @@ apparaît dans le panneau Master :
 à côté de `REKA.exe` dans la release **build-latest**, un `version.json` (numéro de build,
 taille, empreinte) que REKA consulte.
 
-Pour ne pas casser les mises à jour des REKA déjà installés : ne pas renommer le dépôt,
-le tag `build-latest` ni le fichier `.github/workflows/build-windows.yml` (le numéro de
-build est le numéro de run de ce workflow : renommé, il repartirait à 1).
+Pour ne pas casser les mises à jour des REKA déjà installés :
+
+- garder le tag et la release `build-latest` (ne pas la supprimer à la main) ;
+- ne pas renommer `.github/workflows/build-windows.yml` : le numéro de build est le
+  numéro de run de ce workflow, il repartirait à 1 ;
+- ne jamais recréer un dépôt sous un ancien nom (`regret-py/rekav2`) : les REKA construits
+  avant le renommage en `reka` y cherchent leurs mises à jour et n'y arrivent que grâce à
+  la redirection automatique de GitHub, qu'un nouveau dépôt de ce nom supprimerait.
 
 ## Musique en cours
 
